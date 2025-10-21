@@ -97,12 +97,12 @@ class GUI:
             pady=5
         )
         
-        option_practice = ttk.Checkbutton(
+        self.option_practice_box = ttk.Checkbutton(
             self.frame,
             text="Practice Mode",
             variable=self.option_practice
         )
-        option_practice.grid(
+        self.option_practice_box.grid(
             row=self.OPTIONS_ROW,
             column=1,
             sticky=tk.W,
@@ -119,26 +119,26 @@ class GUI:
             pady=5
         )
         
-        game_mode_simple = ttk.Radiobutton(
+        self.game_mode_simple = ttk.Radiobutton(
             self.frame,
             text="Simple",
             variable=self.game_mode,
             value="simple"
         )
-        game_mode_general = ttk.Radiobutton(
+        self.game_mode_general = ttk.Radiobutton(
             self.frame,
             text="General",
             variable=self.game_mode,
             value="general"
         )
         
-        game_mode_simple.grid(
+        self.game_mode_simple.grid(
             row=self.GAME_MODE_ROW,
             column=1,
             sticky=tk.W,
             pady=5
         )
-        game_mode_general.grid(
+        self.game_mode_general.grid(
             row=self.GAME_MODE_ROW,
             column=2,
             sticky=tk.W,
@@ -157,7 +157,7 @@ class GUI:
         
         # Try ttk.Spinbox first (newer tkinter), fall back to tk.Spinbox
         try:
-            spin = ttk.Spinbox(
+            self.board_spin = ttk.Spinbox(
                 self.frame,
                 from_=self.MIN_BOARD_SIZE,
                 to=self.MAX_BOARD_SIZE,
@@ -165,7 +165,7 @@ class GUI:
                 width=5
             )
         except AttributeError:
-            spin = tk.Spinbox(
+            self.board_spin = tk.Spinbox(
                 self.frame,
                 from_=self.MIN_BOARD_SIZE,
                 to=self.MAX_BOARD_SIZE,
@@ -173,7 +173,7 @@ class GUI:
                 width=5
             )
         
-        spin.grid(
+        self.board_spin.grid(
             row=self.BOARD_SIZE_ROW,
             column=1,
             sticky=tk.W,
@@ -192,24 +192,24 @@ class GUI:
     
     def _create_action_buttons(self):
         # Create Start Game and Help buttons.
-        start_game_button = ttk.Button(
+        self.start_button = ttk.Button(
             self.frame,
             text="Start Game",
             command=self.start_game
         )
-        start_game_button.grid(
+        self.start_button.grid(
             row=self.START_BUTTON_ROW,
             column=0,
             columnspan=2,
             pady=10
         )
         
-        help_button = ttk.Button(
+        self.help_button = ttk.Button(
             self.frame,
             text="Help",
             command=self.show_help
         )
-        help_button.grid(
+        self.help_button.grid(
             row=self.HELP_BUTTON_ROW,
             column=0,
             columnspan=2,
@@ -324,12 +324,75 @@ class GUI:
         # Start a new game with the current settings.
         
         # This method will be expanded to initialize game state and logic.
+        self.start = False
+        print(f"Game State: {self.start}")
 
-        print(f"Starting game...")
-        print(f"  Mode: {self.game_mode.get()}")
-        print(f"  Practice: {self.option_practice.get()}")
-        print(f"  Board Size: {self.board_size.get()}")
-        # TODO: Initialize game logic here
+        def debug_print_settings():
+            print(f"Starting game...")
+            print(f"  Mode: {self.game_mode.get()}")
+            print(f"  Practice: {self.option_practice.get()}")
+            print(f"  Board Size: {self.board_size.get()}")
+            print(f"Game State: {self.start}")
+        
+        def confirm_start():
+            self.start = True
+            confirmation_window.destroy()
+            debug_print_settings()
+        
+        def disable_changing_settings():
+            # Disable setting inputs
+            self.start_button.config(state=tk.DISABLED)
+            self.game_mode_simple.config(state=tk.DISABLED)
+            self.game_mode_general.config(state=tk.DISABLED)
+            self.option_practice_box.config(state=tk.DISABLED)
+            self.board_spin.config(state=tk.DISABLED)
+        
+        def enable_changing_settings():
+            # Enable setting inputs
+            self.start_button.config(state=tk.NORMAL)
+            self.game_mode.config(state=tk.NORMAL)
+            self.option_practice.config(state=tk.NORMAL)
+            self.board_size.config(state=tk.NORMAL) 
+
+
+        confirmation_window = tk.Toplevel(self.root)
+        confirmation_window.title("Start Game")
+        confirmation_window.geometry("300x200")
+        confirmation_window.resizable(False, False)
+
+        confirmation_text = ttk.Label(
+            confirmation_window,
+            text=f"Starting with these settings:\nMode: {self.game_mode.get()}\nPractice: {self.option_practice.get()}\nBoard Size: {self.board_size.get()}",
+            font=("Arial", 12)
+        )
+        confirmation_text.grid(row=0, column=0, columnspan=2, pady=20, padx=20)
+        
+
+        confirmation_button = ttk.Button(
+            confirmation_window,
+            text="Confirm",
+            command=confirm_start,
+        )
+        confirmation_button.grid(row=1, column=0, columnspan=2, pady=10)
+
+        while not self.start:
+            self.root.update()
+            print("waiting...")
+            pass  # Wait for user confirmation to start the game
+        
+
+        
+
+        # Game is running loop
+        print(self.start)
+        if(self.start):
+            print("Game has started.")
+            disable_changing_settings()
+
+        
+
+            
+
 
 
 # Temporary main function for standalone testing
