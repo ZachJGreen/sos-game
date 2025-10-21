@@ -1,112 +1,377 @@
+"""
+SOS Game GUI Module
+
+This module implements the main graphical user interface for the SOS game.
+"""
 import tkinter as tk
 from tkinter import ttk
 
+
 class GUI:
-    winx = 0
-    winy = 0
+    """
+    Main GUI class for the SOS Game application.
+    
+    This class manages the game's user interface, including game mode selection,
+    board size configuration, and game board rendering.
+    """
+    
+    # Class-level constants
+    DEFAULT_WINDOW_WIDTH = 1280
+    DEFAULT_WINDOW_HEIGHT = 720
+    DEFAULT_BOARD_SIZE = 5
+    MIN_BOARD_SIZE = 3
+    MAX_BOARD_SIZE = 10
+    CELL_PIXEL_SIZE = 50
+    MAX_CANVAS_SIZE = 1000
+    
+    # UI Grid Layout Constants
+    TITLE_ROW = 0
+    OPTIONS_ROW = 1
+    GAME_MODE_ROW = 2
+    BOARD_SIZE_ROW = 3
+    CANVAS_ROW = 4
+    START_BUTTON_ROW = 5
+    HELP_BUTTON_ROW = 6
+    
     def __init__(self, root):
-        self.winx = "1280"
-        self.winy = "720"
-        self.root = root
-        self.root.title("Main Application")
-        self.root.geometry(self.get_window_size())
-        self.root.resizable(True, True)
-        self.option_practice = tk.BooleanVar()
-        self.game_mode = tk.StringVar()
-        self.game_board_var = tk.StringVar()
-        self.frame = ttk.Frame(root, padding="10")
-        self.frame.grid(row=0, column=0)
-
-        self.setup_widgets()
-
-    def get_window_size(self):
-        win_size = self.winx + "x" + self.winy
-        print(win_size)
-        return win_size
-    def setup_widgets(self):
-        title = ttk.Label(self.frame, text="SOS Game Title", font=("Arial", 24, "bold"))
-        title.grid(row=0, column=0, columnspan=2, pady=(0, 20))
-
-        # Checkbox
-        options_label = ttk.Label(self.frame, text="Game Options")
-        options_label.grid(row=1, column=0, sticky=tk.W, pady=5)
-
-        option_practice = ttk.Checkbutton(self.frame, text="Practice Mode", variable=self.option_practice)
-        option_practice.grid(row=1, column=1, sticky=tk.W, pady=5)
-
-        # Radio Buttons
-        game_mode_label = ttk.Label(self.frame, text="Game Mode")
-        game_mode_label.grid(row=2, column=0, sticky=tk.W, pady=5)
-
-        self.game_mode = tk.StringVar()
-        self.game_mode.set("simple")
-
-        game_mode1 = ttk.Radiobutton(self.frame, text="Simple", variable=self.game_mode, value="simple")
-        game_mode2 = ttk.Radiobutton(self.frame, text="General", variable=self.game_mode, value="general")
-        game_mode1.grid(row=2, column=1, sticky=tk.W, pady=5)
-        game_mode2.grid(row=2, column=2, sticky=tk.W, pady=5)
+        """
+        Initialize the GUI application.
         
-        # Draw Game Board
-        self.draw_game_board()
+        Args:
+            root: The root Tk window
+        """
+        self.root = root
+        self._window_width = self.DEFAULT_WINDOW_WIDTH
+        self._window_height = self.DEFAULT_WINDOW_HEIGHT
+        
+        # Initialize instance variables
+        self.canvas = None
+        
+        # Initialize Tkinter variables
+        self.option_practice = tk.BooleanVar(value=False)
+        self.game_mode = tk.StringVar(value="simple")
+        self.game_board_var = tk.StringVar()
+        self.board_size = tk.IntVar(value=self.DEFAULT_BOARD_SIZE)
+        
+        # Configure root window
+        self._configure_window()
+        
+        # Create main frame
+        self.frame = ttk.Frame(root, padding="10")
+        self.frame.grid(row=0, column=0, sticky=(tk.N, tk.W, tk.E, tk.S))
+        
+        # Setup all widgets
+        self.setup_widgets()
+    
+    def _configure_window(self):
+        """Configure the main application window properties."""
+        self.root.title("SOS Game")
+        self.root.geometry(f"{self._window_width}x{self._window_height}")
+        self.root.resizable(True, True)
+    
+    def setup_widgets(self):
+        """Set up all GUI widgets in the main window."""
+        self._create_title()
+        self._create_game_options()
+        self._create_game_mode_selection()
+        self._create_board_size_selector()
+        self._create_game_board()
+        self._create_action_buttons()
+    
+    def _create_title(self):
+        """Create and place the application title."""
+        title = ttk.Label(
+            self.frame,
+            text="SOS Game",
+            font=("Arial", 24, "bold")
+        )
+        title.grid(
+            row=self.TITLE_ROW,
+            column=0,
+            columnspan=2,
+            pady=(0, 20)
+        )
+    
+    def _create_game_options(self):
+        """Create game options section (practice mode checkbox)."""
+        options_label = ttk.Label(self.frame, text="Game Options")
+        options_label.grid(
+            row=self.OPTIONS_ROW,
+            column=0,
+            sticky=tk.W,
+            pady=5
+        )
+        
+        option_practice = ttk.Checkbutton(
+            self.frame,
+            text="Practice Mode",
+            variable=self.option_practice
+        )
+        option_practice.grid(
+            row=self.OPTIONS_ROW,
+            column=1,
+            sticky=tk.W,
+            pady=5
+        )
+    
+    def _create_game_mode_selection(self):
+        """Create game mode selection radio buttons."""
+        game_mode_label = ttk.Label(self.frame, text="Game Mode")
+        game_mode_label.grid(
+            row=self.GAME_MODE_ROW,
+            column=0,
+            sticky=tk.W,
+            pady=5
+        )
+        
+        game_mode_simple = ttk.Radiobutton(
+            self.frame,
+            text="Simple",
+            variable=self.game_mode,
+            value="simple"
+        )
+        game_mode_general = ttk.Radiobutton(
+            self.frame,
+            text="General",
+            variable=self.game_mode,
+            value="general"
+        )
+        
+        game_mode_simple.grid(
+            row=self.GAME_MODE_ROW,
+            column=1,
+            sticky=tk.W,
+            pady=5
+        )
+        game_mode_general.grid(
+            row=self.GAME_MODE_ROW,
+            column=2,
+            sticky=tk.W,
+            pady=5
+        )
+    
+    def _create_board_size_selector(self):
+        """Create board size spinbox selector."""
+        board_label = ttk.Label(self.frame, text="Board Size")
+        board_label.grid(
+            row=self.BOARD_SIZE_ROW,
+            column=0,
+            sticky=tk.W,
+            pady=5
+        )
+        
+        # Try ttk.Spinbox first (newer tkinter), fall back to tk.Spinbox
+        try:
+            spin = ttk.Spinbox(
+                self.frame,
+                from_=self.MIN_BOARD_SIZE,
+                to=self.MAX_BOARD_SIZE,
+                textvariable=self.board_size,
+                width=5
+            )
+        except AttributeError:
+            spin = tk.Spinbox(
+                self.frame,
+                from_=self.MIN_BOARD_SIZE,
+                to=self.MAX_BOARD_SIZE,
+                textvariable=self.board_size,
+                width=5
+            )
+        
+        spin.grid(
+            row=self.BOARD_SIZE_ROW,
+            column=1,
+            sticky=tk.W,
+            pady=5
+        )
+        
+        # Attach trace to redraw board when size changes
+        self.board_size.trace_add(
+            'write',
+            lambda *args: self.draw_game_board(self.board_size.get())
+        )
+    
+    def _create_game_board(self):
+        """Initialize and draw the game board canvas."""
+        self.draw_game_board(self.board_size.get())
+    
+    def _create_action_buttons(self):
+        """Create Start Game and Help buttons."""
+        start_game_button = ttk.Button(
+            self.frame,
+            text="Start Game",
+            command=self.start_game
+        )
+        start_game_button.grid(
+            row=self.START_BUTTON_ROW,
+            column=0,
+            columnspan=2,
+            pady=10
+        )
+        
+        help_button = ttk.Button(
+            self.frame,
+            text="Help",
+            command=self.show_help
+        )
+        help_button.grid(
+            row=self.HELP_BUTTON_ROW,
+            column=0,
+            columnspan=2,
+            pady=10
+        )
 
-        # Start Game Button
-        start_game_button = ttk.Button(self.frame, text="Start Game", command=self.start_game)
-        start_game_button.grid(row=5, column=0, columnspan=2, pady=10)
-
-        # Help Button
-        help_button = ttk.Button(self.frame, text="Help", command=self.help)
-        help_button.grid(row=6, column=0, columnspan=2, pady=10)
-
-    def draw_game_board(self):
-        # Draw Grid Lines for 10x10 Game Board
-        grid_size = 300
-        spaces = 7
-        canvas = tk.Canvas(self.frame, width=grid_size, height=grid_size)
-        canvas.grid(row=4, column=1, columnspan=2, pady=10)
-        for i in range(spaces):
-            #rows
-            canvas.create_line(0, i * (grid_size / spaces), grid_size, i * (grid_size / spaces))
-            #columns
-            canvas.create_line(i * (grid_size / spaces), 0, i * (grid_size / spaces), grid_size)
-
-        # Draw Border around the Game Board
-        canvas.create_rectangle(0, 0, grid_size, grid_size, width=2)
-
-
-    # Open Help Window
-    def help(self):
-        # Create Help Window
+    
+    def draw_game_board(self, spaces=None):
+        """
+        Draw or redraw the game board with the specified number of cells.
+        
+        Args:
+            spaces: Number of cells per side. If None, uses default board size.
+        """
+        if spaces is None:
+            spaces = self.DEFAULT_BOARD_SIZE
+        
+        # Validate and clamp spaces to acceptable range
+        spaces = self._validate_board_size(spaces)
+        
+        # Calculate canvas dimensions
+        grid_size = self._calculate_grid_size(spaces)
+        
+        # Destroy previous canvas if it exists
+        self._destroy_previous_canvas()
+        
+        # Create new canvas
+        self.canvas = tk.Canvas(
+            self.frame,
+            width=grid_size,
+            height=grid_size,
+            bg="white"
+        )
+        self.canvas.grid(
+            row=self.CANVAS_ROW,
+            column=1,
+            columnspan=2,
+            pady=10
+        )
+        
+        # Draw grid lines and border
+        self._draw_grid_lines(spaces, grid_size)
+        self._draw_border(grid_size)
+    
+    def _validate_board_size(self, spaces):
+        """
+        Validate and clamp board size to acceptable range.
+        
+        Args:
+            spaces: Requested board size
+            
+        Returns:
+            Valid board size (int) within MIN_BOARD_SIZE and MAX_BOARD_SIZE
+        """
+        try:
+            spaces = int(spaces)
+        except (ValueError, TypeError):
+            return self.DEFAULT_BOARD_SIZE
+        
+        return max(self.MIN_BOARD_SIZE, min(spaces, self.MAX_BOARD_SIZE))
+    
+    def _calculate_grid_size(self, spaces):
+        """
+        Calculate canvas pixel size based on board size.
+        
+        Args:
+            spaces: Number of cells per side
+            
+        Returns:
+            Canvas size in pixels (int)
+        """
+        grid_size = int(spaces * self.CELL_PIXEL_SIZE)
+        return min(grid_size, self.MAX_CANVAS_SIZE)
+    
+    def _destroy_previous_canvas(self):
+        """Safely destroy the previous canvas if it exists."""
+        if self.canvas is not None:
+            try:
+                self.canvas.destroy()
+            except tk.TclError:
+                pass  # Canvas already destroyed
+    
+    def _draw_grid_lines(self, spaces, grid_size):
+        """
+        Draw grid lines on the canvas.
+        
+        Args:
+            spaces: Number of cells per side
+            grid_size: Canvas size in pixels
+        """
+        cell_size = grid_size / spaces
+        
+        for i in range(spaces + 1):
+            # Horizontal lines
+            y = i * cell_size
+            self.canvas.create_line(0, y, grid_size, y, fill="black")
+            
+            # Vertical lines
+            x = i * cell_size
+            self.canvas.create_line(x, 0, x, grid_size, fill="black")
+    
+    def _draw_border(self, grid_size):
+        """
+        Draw a border around the game board.
+        
+        Args:
+            grid_size: Canvas size in pixels
+        """
+        self.canvas.create_rectangle(
+            0, 0,
+            grid_size, grid_size,
+            width=2,
+            outline="black"
+        )
+    
+    def show_help(self):
+        """Display the help window with game instructions."""
         help_window = tk.Toplevel(self.root)
-        help_window.title("Help")
+        help_window.title("Help - SOS Game")
         help_window.geometry("640x480")
         help_window.resizable(False, False)
-
-        # Help Text
-        help_text = ttk.Label(help_window, text="Wouldn't you like to know, weather boy?")
-        help_text.grid(row=0, column=0, columnspan=2, pady=5)
         
-        # Close Button
-        close_button = ttk.Button(help_window, text="Close", command=help_window.destroy)
-        close_button.grid(row=1, column=0, columnspan=2, pady=5)
-
-    # Start Game
+        # Help text
+        help_text = ttk.Label(
+            help_window,
+            text="Wouldn't you like to know, weather boy?",
+            font=("Arial", 12)
+        )
+        help_text.grid(row=0, column=0, columnspan=2, pady=20, padx=20)
+        
+        # Close button
+        close_button = ttk.Button(
+            help_window,
+            text="Close",
+            command=help_window.destroy
+        )
+        close_button.grid(row=1, column=0, columnspan=2, pady=10)
+    
     def start_game(self):
-        print("Start Game")
+        """
+        Start a new game with the current settings.
+        
+        This method will be expanded to initialize game state and logic.
+        """
+        print(f"Starting game...")
+        print(f"  Mode: {self.game_mode.get()}")
+        print(f"  Practice: {self.option_practice.get()}")
+        print(f"  Board Size: {self.board_size.get()}")
+        # TODO: Initialize game logic here
 
-    def track_resolution(self):
-        res_text =  ttk.Label(self.frame, text="Resolution: ")
-        if(self.option_practice is True):
-            #Show Content
-            res_text.grid(row=7, column=0, columnspan=2, pady=5)
-        else:
-            #Hide Content
-            print("oof")
 
 def main():
+    """Main entry point for the application."""
     root = tk.Tk()
     app = GUI(root)
-
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
