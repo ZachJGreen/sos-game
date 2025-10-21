@@ -1,20 +1,19 @@
-"""
-SOS Game GUI Module
 
-This module implements the main graphical user interface for the SOS game.
-"""
+# SOS Game GUI
+
+# Implements the main graphical user interface for the SOS game.
 import tkinter as tk
 from tkinter import ttk
 
 
 class GUI:
-    """
-    Main GUI class for the SOS Game application.
     
-    This class manages the game's user interface, including game mode selection,
-    board size configuration, and game board rendering.
-    """
+    # Main GUI class for the SOS Game application.
     
+    # Manages the game's user interface, including game mode selection,
+    # board size configuration, and game board rendering.
+
+
     # Class-level constants
     DEFAULT_WINDOW_WIDTH = 1280
     DEFAULT_WINDOW_HEIGHT = 720
@@ -34,12 +33,8 @@ class GUI:
     HELP_BUTTON_ROW = 6
     
     def __init__(self, root):
-        """
-        Initialize the GUI application.
-        
-        Args:
-            root: The root Tk window
-        """
+
+        # Initialize the GUI application.
         self.root = root
         self._window_width = self.DEFAULT_WINDOW_WIDTH
         self._window_height = self.DEFAULT_WINDOW_HEIGHT
@@ -64,13 +59,13 @@ class GUI:
         self.setup_widgets()
     
     def _configure_window(self):
-        """Configure the main application window properties."""
+        # Configure the main application window properties.
         self.root.title("SOS Game")
         self.root.geometry(f"{self._window_width}x{self._window_height}")
         self.root.resizable(True, True)
     
     def setup_widgets(self):
-        """Set up all GUI widgets in the main window."""
+        # Set up all GUI widgets in the main window.
         self._create_title()
         self._create_game_options()
         self._create_game_mode_selection()
@@ -79,7 +74,7 @@ class GUI:
         self._create_action_buttons()
     
     def _create_title(self):
-        """Create and place the application title."""
+        # Create and place the application title.
         title = ttk.Label(
             self.frame,
             text="SOS Game",
@@ -93,7 +88,7 @@ class GUI:
         )
     
     def _create_game_options(self):
-        """Create game options section (practice mode checkbox)."""
+        # Create game options section (practice mode checkbox).
         options_label = ttk.Label(self.frame, text="Game Options")
         options_label.grid(
             row=self.OPTIONS_ROW,
@@ -115,7 +110,7 @@ class GUI:
         )
     
     def _create_game_mode_selection(self):
-        """Create game mode selection radio buttons."""
+        # Create game mode selection radio buttons.
         game_mode_label = ttk.Label(self.frame, text="Game Mode")
         game_mode_label.grid(
             row=self.GAME_MODE_ROW,
@@ -151,7 +146,7 @@ class GUI:
         )
     
     def _create_board_size_selector(self):
-        """Create board size spinbox selector."""
+        # Create board size spinbox selector.
         board_label = ttk.Label(self.frame, text="Board Size")
         board_label.grid(
             row=self.BOARD_SIZE_ROW,
@@ -192,11 +187,11 @@ class GUI:
         )
     
     def _create_game_board(self):
-        """Initialize and draw the game board canvas."""
+        # Initialize and draw the game board canvas.
         self.draw_game_board(self.board_size.get())
     
     def _create_action_buttons(self):
-        """Create Start Game and Help buttons."""
+        # Create Start Game and Help buttons.
         start_game_button = ttk.Button(
             self.frame,
             text="Start Game",
@@ -223,12 +218,8 @@ class GUI:
 
     
     def draw_game_board(self, spaces=None):
-        """
-        Draw or redraw the game board with the specified number of cells.
         
-        Args:
-            spaces: Number of cells per side. If None, uses default board size.
-        """
+        # Draw or redraw the game board with the specified number of cells.
         if spaces is None:
             spaces = self.DEFAULT_BOARD_SIZE
         
@@ -260,15 +251,7 @@ class GUI:
         self._draw_border(grid_size)
     
     def _validate_board_size(self, spaces):
-        """
-        Validate and clamp board size to acceptable range.
-        
-        Args:
-            spaces: Requested board size
-            
-        Returns:
-            Valid board size (int) within MIN_BOARD_SIZE and MAX_BOARD_SIZE
-        """
+        # Validate and clamp board size to acceptable range.
         try:
             spaces = int(spaces)
         except (ValueError, TypeError):
@@ -277,20 +260,13 @@ class GUI:
         return max(self.MIN_BOARD_SIZE, min(spaces, self.MAX_BOARD_SIZE))
     
     def _calculate_grid_size(self, spaces):
-        """
-        Calculate canvas pixel size based on board size.
-        
-        Args:
-            spaces: Number of cells per side
-            
-        Returns:
-            Canvas size in pixels (int)
-        """
+
+        # Calculate canvas pixel size based on board size.
         grid_size = int(spaces * self.CELL_PIXEL_SIZE)
         return min(grid_size, self.MAX_CANVAS_SIZE)
     
     def _destroy_previous_canvas(self):
-        """Safely destroy the previous canvas if it exists."""
+        # Safely destroy the previous canvas if it exists.
         if self.canvas is not None:
             try:
                 self.canvas.destroy()
@@ -298,13 +274,7 @@ class GUI:
                 pass  # Canvas already destroyed
     
     def _draw_grid_lines(self, spaces, grid_size):
-        """
-        Draw grid lines on the canvas.
-        
-        Args:
-            spaces: Number of cells per side
-            grid_size: Canvas size in pixels
-        """
+        # Draw grid lines on the canvas.
         cell_size = grid_size / spaces
         
         for i in range(spaces + 1):
@@ -317,12 +287,8 @@ class GUI:
             self.canvas.create_line(x, 0, x, grid_size, fill="black")
     
     def _draw_border(self, grid_size):
-        """
-        Draw a border around the game board.
-        
-        Args:
-            grid_size: Canvas size in pixels
-        """
+
+        # Draw a border around the game board.
         self.canvas.create_rectangle(
             0, 0,
             grid_size, grid_size,
@@ -331,7 +297,7 @@ class GUI:
         )
     
     def show_help(self):
-        """Display the help window with game instructions."""
+        # Display the help window with game instructions.
         help_window = tk.Toplevel(self.root)
         help_window.title("Help - SOS Game")
         help_window.geometry("640x480")
@@ -354,11 +320,11 @@ class GUI:
         close_button.grid(row=1, column=0, columnspan=2, pady=10)
     
     def start_game(self):
-        """
-        Start a new game with the current settings.
+
+        # Start a new game with the current settings.
         
-        This method will be expanded to initialize game state and logic.
-        """
+        # This method will be expanded to initialize game state and logic.
+
         print(f"Starting game...")
         print(f"  Mode: {self.game_mode.get()}")
         print(f"  Practice: {self.option_practice.get()}")
@@ -366,8 +332,9 @@ class GUI:
         # TODO: Initialize game logic here
 
 
+# Temporary main function for standalone testing
 def main():
-    """Main entry point for the application."""
+    # Main entry point for the application.
     root = tk.Tk()
     app = GUI(root)
     root.mainloop()
