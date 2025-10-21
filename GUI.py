@@ -375,16 +375,20 @@ class GUI:
         )
         confirmation_button.grid(row=1, column=0, columnspan=2, pady=10)
 
+        if(not self.start):
+            print("waiting...")
         while not self.start:
             self.root.update()
-            print("waiting...")
-            pass  # Wait for user confirmation to start the game
+            # break loop if window is closed without confirmation
+            if not confirmation_window.winfo_exists():
+                print("Game start cancelled.")
+                break
         
 
         
 
         # Game is running loop
-        print(self.start)
+        print(f"Game State: {self.start}")
         if(self.start):
             print("Game has started.")
             disable_changing_settings()
