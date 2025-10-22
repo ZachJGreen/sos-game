@@ -47,6 +47,7 @@ class GUI:
         self.game_mode = tk.StringVar(value="simple")
         self.game_board_var = tk.StringVar()
         self.board_size = tk.IntVar(value=self.DEFAULT_BOARD_SIZE)
+        self.move_selection = tk.StringVar(value="S")
         
         # Configure root window
         self._configure_window()
@@ -164,6 +165,7 @@ class GUI:
                 textvariable=self.board_size,
                 width=5
             )
+            print("Using ttk.Spinbox for board size selection.")
         except AttributeError:
             self.board_spin = tk.Spinbox(
                 self.frame,
@@ -202,6 +204,33 @@ class GUI:
             column=0,
             columnspan=2,
             pady=10
+        )
+
+        self.move_selection_S = ttk.Radiobutton(
+            self.frame,
+            text="S",
+            variable=self.move_selection,
+            value="S"
+        )
+        self.move_selection_O = ttk.Radiobutton(
+            self.frame,
+            text="O",
+            variable=self.move_selection,
+            value="O"
+        )
+        self.move_selection_S.grid(
+            row=self.CANVAS_ROW,
+            sticky=tk.E,
+            column=3,
+            pady=30,
+            padx=30
+        )
+        self.move_selection_O.grid(
+            row=self.CANVAS_ROW,
+            sticky=tk.E,
+            column=4,
+            pady=30,
+            padx=30
         )
         
         self.help_button = ttk.Button(
