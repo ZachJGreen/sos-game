@@ -328,7 +328,7 @@ class GUI:
         )
     
     def _create_clickable_cells(self):
-        """Create invisible buttons over each cell that can be clicked."""
+        # Create invisible buttons over each cell that can be clicked.
         cell_size = self.current_grid_size / self.current_spaces
         
         for row in range(self.current_spaces):
@@ -348,7 +348,7 @@ class GUI:
                 )
     
     def _handle_cell_click(self, row, col):
-        """Handle a click on a cell in the game board."""
+        # Handle a click on a cell in the game board.
         cell_key = (row, col)
         
         # Check if cell is already occupied
