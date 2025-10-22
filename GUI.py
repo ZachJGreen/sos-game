@@ -1,4 +1,3 @@
-
 # SOS Game GUI
 
 # Implements the main graphical user interface for the SOS game.
@@ -48,6 +47,12 @@ class GUI:
         self.game_board_var = tk.StringVar()
         self.board_size = tk.IntVar(value=self.DEFAULT_BOARD_SIZE)
         self.move_selection = tk.StringVar(value="S")
+        
+        # Game state tracking
+        self.game_started = False
+        self.board_state = {}  # Dictionary to track cell states
+        self.current_grid_size = 0
+        self.current_spaces = 0
         
         # Configure root window
         self._configure_window()
@@ -156,24 +161,13 @@ class GUI:
             pady=5
         )
         
-        # Try ttk.Spinbox first (newer tkinter), fall back to tk.Spinbox
-        try:
-            self.board_spin = ttk.Spinbox(
-                self.frame,
-                from_=self.MIN_BOARD_SIZE,
-                to=self.MAX_BOARD_SIZE,
-                textvariable=self.board_size,
-                width=5
-            )
-            print("Using ttk.Spinbox for board size selection.")
-        except AttributeError:
-            self.board_spin = tk.Spinbox(
-                self.frame,
-                from_=self.MIN_BOARD_SIZE,
-                to=self.MAX_BOARD_SIZE,
-                textvariable=self.board_size,
-                width=5
-            )
+        self.board_spin = ttk.Spinbox(
+            self.frame,
+            from_=self.MIN_BOARD_SIZE,
+            to=self.MAX_BOARD_SIZE,
+            textvariable=self.board_size,
+            width=5
+        )
         
         self.board_spin.grid(
             row=self.BOARD_SIZE_ROW,
@@ -258,6 +252,10 @@ class GUI:
         # Calculate canvas dimensions
         grid_size = self._calculate_grid_size(spaces)
         
+        # Store current board dimensions
+        self.current_grid_size = grid_size
+        self.current_spaces = spaces
+        
         # Destroy previous canvas if it exists
         self._destroy_previous_canvas()
         
@@ -278,6 +276,10 @@ class GUI:
         # Draw grid lines and border
         self._draw_grid_lines(spaces, grid_size)
         self._draw_border(grid_size)
+        
+        # If game is started, add clickable cells
+        if self.game_started:
+            self._create_clickable_cells()
     
     def _validate_board_size(self, spaces):
         # Validate and clamp board size to acceptable range.
@@ -325,6 +327,56 @@ class GUI:
             outline="black"
         )
     
+    def _create_clickable_cells(self):
+        """Create invisible buttons over each cell that can be clicked."""
+        cell_size = self.current_grid_size / self.current_spaces
+        
+        for row in range(self.current_spaces):
+            for col in range(self.current_spaces):
+                # Create a transparent rectangle for each cell
+                cell_id = self.canvas.create_rectangle(
+                    col * cell_size, row * cell_size,
+                    (col + 1) * cell_size, (row + 1) * cell_size,
+                    fill="", outline="", tags=f"cell_{row}_{col}"
+                )
+                
+                # Bind click event to the cell
+                self.canvas.tag_bind(
+                    f"cell_{row}_{col}",
+                    "<Button-1>",
+                    lambda event, r=row, c=col: self._handle_cell_click(r, c)
+                )
+    
+    def _handle_cell_click(self, row, col):
+        """Handle a click on a cell in the game board."""
+        cell_key = (row, col)
+        
+        # Check if cell is already occupied
+        if cell_key in self.board_state:
+            print(f"Cell ({row}, {col}) already occupied with '{self.board_state[cell_key]}'")
+            return
+        
+        # Get the selected move (S or O)
+        move = self.move_selection.get()
+        
+        # Store the move in board state
+        self.board_state[cell_key] = move
+        
+        # Display the letter in the cell
+        cell_size = self.current_grid_size / self.current_spaces
+        center_x = (col + 0.5) * cell_size
+        center_y = (row + 0.5) * cell_size
+        
+        font_size = int(cell_size * 0.6)
+        self.canvas.create_text(
+            center_x, center_y,
+            text=move,
+            font=("Arial", font_size, "bold"),
+            fill="blue" if move == "S" else "red"
+        )
+        
+        print(f"Placed '{move}' at cell ({row}, {col})")
+    
     def show_help(self):
         # Display the help window with game instructions.
         help_window = tk.Toplevel(self.root)
@@ -365,6 +417,8 @@ class GUI:
         
         def confirm_start():
             self.start = True
+            self.game_started = True
+            self.board_state.clear()  # Reset board state
             confirmation_window.destroy()
             debug_print_settings()
         
@@ -379,9 +433,10 @@ class GUI:
         def enable_changing_settings():
             # Enable setting inputs
             self.start_button.config(state=tk.NORMAL)
-            self.game_mode.config(state=tk.NORMAL)
-            self.option_practice.config(state=tk.NORMAL)
-            self.board_size.config(state=tk.NORMAL) 
+            self.game_mode_simple.config(state=tk.NORMAL)
+            self.game_mode_general.config(state=tk.NORMAL)
+            self.option_practice_box.config(state=tk.NORMAL)
+            self.board_spin.config(state=tk.NORMAL)
 
 
         confirmation_window = tk.Toplevel(self.root)
@@ -404,7 +459,7 @@ class GUI:
         )
         confirmation_button.grid(row=1, column=0, columnspan=2, pady=10)
 
-        if(not self.start):
+        if not self.start:
             print("waiting...")
         while not self.start:
             self.root.update()
@@ -418,14 +473,12 @@ class GUI:
 
         # Game is running loop
         print(f"Game State: {self.start}")
-        if(self.start):
+        if self.start:
             print("Game has started.")
             disable_changing_settings()
-
-        
-
             
-
+            # Create clickable cells on the board
+            self._create_clickable_cells()
 
 
 # Temporary main function for standalone testing
