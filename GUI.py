@@ -327,6 +327,7 @@ class GUI:
             outline="black"
         )
     
+    # Credit: Claude
     def _create_clickable_cells(self):
         # Create invisible buttons over each cell that can be clicked.
         cell_size = self.current_grid_size / self.current_spaces
@@ -341,6 +342,7 @@ class GUI:
                 )
                 
                 # Bind click event to the cell
+                
                 self.canvas.tag_bind(
                     f"cell_{row}_{col}",
                     "<Button-1>",
