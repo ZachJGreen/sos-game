@@ -58,6 +58,45 @@ class TestGUI:
         assert gui.game_mode.get() == chosen_mode
         assert len(gui.board_state) == 0
 
+    def test_make_move_simple(self, setup_gui):
 
+        gui, root = setup_gui
+        chosen_mode = "simple"
+        s_location = (0,0)
+        o_location = (0,1)
+        
+        gui.game_mode.set(chosen_mode)
+        root.update()
+
+        gui.game_started = True
+        gui.board_state.clear()
+
+        gui.board_state[s_location] = "S"
+        gui.board_state[o_location] = "O"
+
+        assert gui.game_mode.get() == chosen_mode
+        assert gui.board_state[s_location] == "S"
+        assert gui.board_state[o_location] == "O"
+
+    def test_make_move_general(self, setup_gui):
+
+        gui, root = setup_gui
+        chosen_mode = "general"
+        s_location = (0,0)
+        o_location = (0,1)
+        
+        gui.game_mode.set(chosen_mode)
+        root.update()
+
+        gui.game_started = True
+        gui.board_state.clear()
+
+        gui.board_state[s_location] = "S"
+        gui.board_state[o_location] = "O"
+
+        assert gui.game_mode.get() == chosen_mode
+        assert gui.board_state[s_location] == "S"
+        assert gui.board_state[o_location] == "O"
+        
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
